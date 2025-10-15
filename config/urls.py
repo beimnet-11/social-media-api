@@ -16,7 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+from django.http import JsonResponse
+def home(request):
+    return JsonResponse({
+        'message': 'Social Media Api is Working!',
+        'status': 'success',
+        'endpoints':{
+            'admin':'/admin/',
+            'api_root': '/'
+        }
+    })
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('' ,home,name='home'),
 ]
