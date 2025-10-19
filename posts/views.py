@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Post, like, Comment
+from .models import Post, Like, Comment
 from .serializers import PostSerializer, PostCreateSerializer, CommentSerializer, CommentCreateSerializer, LikeSerializer
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
@@ -18,7 +18,7 @@ def posts_list_create(request):
             full_serializer = PostSerializer(post, context={'request': request})
             return Response(full_serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'DELETE','PATCH'])
 @permission_classes([IsAuthenticated])
 def post_detail(request, post_id):
     try:
@@ -28,7 +28,7 @@ def post_detail(request, post_id):
     if request.method == 'GET':
         serializer = PostSerializer(post, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == 'PUT':
+    elif request.method == 'PATCH':
         if post.author != request.user:
             return Response({'error': 'You do not have permission to edit this post'}, status=status.HTTP_403_FORBIDDEN)
         serializer = PostCreateSerializer(post, data=request.data , partial=True)
@@ -50,7 +50,7 @@ def like_post(request, post_id):
     except Post.DoesNotExist:
         return Response({'error': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
     if request.method == 'POST':
-        like_instance, created = like.objects.get_or_create(user=request.user, post=post)
+        Like_instance, created = Like.objects.get_or_create(user=request.user, post=post)
         if created:
             serializer = LikeSerializer(like_instance)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -58,10 +58,10 @@ def like_post(request, post_id):
             return Response({'message': 'You have already liked this post'}, status=status.HTTP_200_OK)
     elif request.method == 'DELETE':
         try:
-            like_instance = like.objects.get(user=request.user, post=post)
+            like_instance = Like.objects.get(user=request.user, post=post)
             like_instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except like.DoesNotExist:
+        except Like.DoesNotExist:
             return Response({'error': 'You have not liked this post'}, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
