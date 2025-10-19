@@ -1,6 +1,6 @@
 # Social Media API
 
-# Author
+## Author
 Beimnet Abera
 ALX Backend Capstone Project
 
